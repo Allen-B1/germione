@@ -1,6 +1,7 @@
 module github.com/allen-b1/germione
 
 go 1.16
+// +heroku goVersion go1.16
 
 require (
 	github.com/gin-gonic/gin v1.7.2 // indirect
