@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{.Host}}</title>
+        <meta charset="utf-8">
+ <link rel="preconnect" href="https://fonts.gstatic.com">
+ <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&family=Roboto:wght@300;400&display=swap" rel="stylesheet">  
+          <style>
+body { font-family: 'Roboto', sans-serif; font-weight: 300;
+font-size: 14px; }
+h1,h2,h3,p, pre { margin: 0;min-height: 1em;}
+h1,h2,h3 { font-weight: 400; }
+h1 { font-size: 24px; text-align: center; }
+h2 { font-size: 18px; }
+h3 { font-size: 14px; }
+pre { 
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+}
+main {
+    max-width: 720px;
+    margin: auto;
+    margin-bottom: 32px;
+}
+header {
+    display: flex;
+    background: {{.Theme}};
+    font-size: 14px;
+    color: #fff;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    width: 100%;
+}
+header .path { flex-grow: 1; }
+.path a, .path a:visited, .path a:active {
+    color: #fff; }
+header .path, header .status {
+    padding: 8px 16px; }
+#header-spacer {height: 64px; }
+
+.error {
+    color: red;
+    text-align: center;
+}
+
+.search-text {
+    text-align: center;
+    margin-bottom: 16px; }
+.search-box {
+    margin: auto;
+    display: flex;
+    width: 256px;
+}
+.search-box input {
+    flex-grow: 1;
+}
+.list {
+    margin-left: 32px;
+    text-indent: -12px;
+}
+.list::before {
+    content: "- ";
+    display: inline-block;
+    padding: 0 4px;
+    padding-right: 8px;
+    color: #888;
+}
+
+.silver, .silver a { color: rgba(255,255,255,0.7); }
+.silver a { color: rgba(255,255,255,0.7) !important; text-decoration: none; }
+
+.quote {
+    margin-left: 16px;
+    text-indent: -8px;
+    color: #666;
+}
+.quote::before {
+    content: "> ";
+    display: inline-block;
+    padding-right: 8px;
+    color: #888;
+}
+
+input {
+    border-radius: 0;
+    border: 1px solid #000;
+    outline: 0;
+}
+input:focus {
+    border: 1px solid blue;
+}
+button {
+    border: 0;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+}
+button:focus {
+    border: 1px solid blue;
+    outline: 0;
+}
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="path"><span class="silver"><a href="/">gemini:</a>//</span>{{splitpath .Path}}</div>
+            <div class="status">{{.Status}}</div>
+        </header>
+        <div id="header-spacer"></div>
+
+        {{if not (isnil .Error)}}
+            <h2 class="error">{{.Error}}</h2>
+        {{end}}
+
+        {{if not (isnil .Search)}}
+        <form method="GET" action="/search" id="search-box">
+            <h2 class="search-text">{{.Search}}</h2>
+            <input type="hidden" name="url" value="{{.Path}}">
+            <div class="search-box">
+                <input type="text" name="q">
+                <button type="submit">{{if issearch .Search}}🔎︎{{else}}↵{{end}}</button>
+            </div>
+        </form>
+        {{end}}
+
+        {{if not (isnil .Content)}}
+        <main>
+            {{if eq .Type "text/gemini"}}
+                {{.Content}}
+            {{else}}
+<pre>
+{{.Content}}
+</pre>
+            {{end}}
+        </main>
+        {{end}}
+    </body>
+</html>
