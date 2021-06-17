@@ -168,9 +168,12 @@ func main() {
 		c.Redirect(http.StatusTemporaryRedirect, "/gemini/geminispace.info/search")
 	})
 
-	r.GET("/gemini/*url", func(c *gin.Context) {
-		r.LoadHTMLGlob("templates/*")
+	r.GET("/source", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "https://github.com/allen-b1/germione")
+	})
 
+	r.LoadHTMLGlob("templates/*")
+	r.GET("/gemini/*url", func(c *gin.Context) {
 		fullpath := c.Param("url")[1:]
 		fullpathQuery := fullpath
 		if c.Request.URL.RawQuery != "" {
