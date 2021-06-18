@@ -4,9 +4,9 @@ import (
 	"html"
 	"html/template"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
 	"sync"
 	"time"
@@ -40,10 +40,11 @@ func toHTML(body string, originalurl string) template.HTML {
 				fields := strings.Fields(line)
 				url := ""
 				text := ""
+
 				if len(fields[0]) > 2 {
 					url = fields[0][2:]
 					text = strings.Join(fields[1:], " ")
-				} else {
+				} else if len(fields) >= 2 {
 					url = fields[1]
 					if len(fields) > 2 {
 						text = strings.Join(fields[2:], " ")
@@ -77,30 +78,29 @@ func toHTML(body string, originalurl string) template.HTML {
 	return template.HTML(out)
 }
 
-func geminiToHTTP(urlr string, original string) string {
+func geminiToHTTP(urlr string, base string) string {
 	u, err := url.Parse(urlr)
-	if err == nil && u.Scheme != "" {
-		if u.Scheme == "gemini" {
-			str := "/gemini/" + u.Host + u.Path + "?"
-			if u.RawQuery != "" {
-				str += "?" + u.RawQuery
-			}
-			if u.Fragment != "" {
-				str += "#" + u.EscapedFragment()
-			}
-			return str
-		} else {
-			return u.String()
-		}
+	if err != nil {
+		return "/error"
 	}
 
-	if strings.HasPrefix(urlr, "//") {
-		return "/gemini/" + urlr[2:]
-	} else if strings.HasPrefix(urlr, "/") {
-		return "/gemini/" + strings.Split(original, "/")[0] + urlr
-	} else {
-		return "/gemini/" + path.Join(path.Dir(original), urlr)
+	baseurl, err := url.Parse("gemini://" + base)
+	if err == nil {
+		u = baseurl.ResolveReference(u)
 	}
+
+	if u.Scheme == "gemini" {
+		str := "/gemini/" + u.Host + u.Path
+		if u.RawQuery != "" {
+			str += "?" + u.RawQuery
+		}
+		if u.Fragment != "" {
+			str += "#" + u.EscapedFragment()
+		}
+		return str
+	}
+
+	return u.String()
 }
 
 var client = &gemini.Client{
@@ -125,7 +125,7 @@ func getTheme(host string) string {
 	theme := "#000"
 	if err == nil && resp.Status == 20 {
 		body, err := ioutil.ReadAll(resp.Body)
-		if err == nil && strings.HasPrefix(string(body), "#") {
+		if err == nil && strings.HasPrefix(string(body), "#") && len(string(body)) < 8 {
 			theme = string(body)
 		}
 	}
@@ -218,12 +218,31 @@ func main() {
 				})
 				return
 			}
-			if strings.Split(resp.Meta, ";")[0] == "text/gemini" {
+
+			mediaType, params, err := mime.ParseMediaType(resp.Meta)
+			if err != nil {
+				c.HTML(http.StatusInternalServerError, "site.tmpl", gin.H{
+					"Host":   host,
+					"Path":   fullpathQuery,
+					"Theme":  theme,
+					"Status": "--",
+					"Error":  "Invalid media type: " + err.Error(),
+				})
+				return
+			}
+
+			if mediaType == "text/gemini" {
+				charset := params["charset"]
+				if charset == "" {
+					charset = "utf-8"
+				}
+				c.Header("Content-Type", "text/html;charset="+charset)
 				c.HTML(http.StatusOK, "site.tmpl", gin.H{
 					"Host":    host,
 					"Path":    fullpathQuery,
 					"Theme":   theme,
 					"Status":  resp.Status,
+					"Charset": charset,
 					"Type":    "text/gemini",
 					"Content": toHTML(string(body), fullpath),
 				})
