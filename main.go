@@ -125,7 +125,7 @@ func getTheme(host string) string {
 	theme := "#000"
 	if err == nil && resp.Status == 20 {
 		body, err := ioutil.ReadAll(resp.Body)
-		if err == nil {
+		if err == nil && strings.HasPrefix(string(body), "#") {
 			theme = string(body)
 		}
 	}
