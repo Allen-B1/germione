@@ -64,9 +64,9 @@ func toHTML(body string, originalurl string) template.HTML {
 				htmlLine = "<pre title=\"" + html.EscapeString(strings.TrimSpace(line[3:])) + "\">"
 				isPre = true
 			} else if strings.HasPrefix(line, "*") {
-				htmlLine = "<p class=\"list\">" + html.EscapeString(line[1:]) + "</p>"
+				htmlLine = "<p class=\"list\">" + strings.TrimSpace(html.EscapeString(line[1:])) + "</p>"
 			} else if strings.HasPrefix(line, ">") {
-				htmlLine = "<p class=\"quote\">" + html.EscapeString(line[1:]) + "</p>"
+				htmlLine = "<p class=\"quote\">" + strings.TrimSpace(html.EscapeString(line[1:])) + "</p>"
 			} else {
 				htmlLine = "<p>" + html.EscapeString(line) + "</p>"
 			}
