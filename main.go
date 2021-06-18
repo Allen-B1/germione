@@ -99,7 +99,7 @@ func geminiToHTTP(urlr string, original string) string {
 	} else if strings.HasPrefix(urlr, "/") {
 		return "/gemini/" + strings.Split(original, "/")[0] + urlr
 	} else {
-		return "/gemini/" + path.Join(original, urlr)
+		return "/gemini/" + path.Join(path.Dir(original), urlr)
 	}
 }
 
