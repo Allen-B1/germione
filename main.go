@@ -199,11 +199,12 @@ func main() {
 
 		if resp.Status >= 10 && resp.Status < 20 {
 			c.HTML(http.StatusOK, "site.tmpl", gin.H{
-				"Host":   host,
-				"Path":   fullpathQuery,
-				"Theme":  theme,
-				"Status": resp.Status,
-				"Search": resp.Meta,
+				"Host":     host,
+				"Path":     fullpathQuery,
+				"Theme":    theme,
+				"Status":   resp.Status,
+				"Search":   resp.Meta,
+				"Password": resp.Status == 11,
 			})
 		} else if resp.Status >= 20 && resp.Status < 30 {
 			body, err := ioutil.ReadAll(resp.Body)

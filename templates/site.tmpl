@@ -119,7 +119,7 @@ button:focus {
             <h2 class="search-text">{{.Search}}</h2>
             <input type="hidden" name="url" value="{{.Path}}">
             <div class="search-box">
-                <input type="text" name="q">
+                <input type="{{if .Password}}password{{else}}text{{end}}" name="q">
                 <button type="submit">{{if issearch .Search}}🔎︎{{else}}↵{{end}}</button>
             </div>
         </form>
